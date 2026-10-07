@@ -1,7 +1,6 @@
-# 🎙️ Gemini Voice Replication & TTS デモ (Bun + TypeScript)
+# 🎙️ Gemini Voice Replication & TTS デモ
 
-Google Gemini API の最新TTSモデル（`gemini-3.8-flash-tts` および `gemini-3.8-flash-lite-tts`）を使用した、**Voice Replication（声のクローン学習）** および **Text-to-Speech（音声合成）** を体験できるTypeScriptプロジェクトです。
-ランタイムには高速な **Bun** を採用しています。
+Google Gemini API のTTSモデル（`gemini-3.8-flash-tts` および `gemini-3.8-flash-lite-tts`）を使用した、**Voice Replication（声のクローン学習）** および **Text-to-Speech（音声合成）** を体験できるTypeScriptプロジェクトです。
 
 ---
 
@@ -77,7 +76,7 @@ GEMINI_API_KEY=AIzaSy...あなたのAPIキー
 
 ### 3. 音声モデルの作成（Replication）
 
-PowerShell 7 で以下のコマンドを実行します：
+PowerShell で以下のコマンドを実行します：
 
 #### 🌟 標準モデル (`gemini-3.8-flash-tts`) で作成
 
@@ -144,9 +143,3 @@ bun run delete-voice
 # または特定のIDを指定:
 bun run delete-voice voice_xxxxxx
 ```
-
----
-
-## 📄 ライセンス
-
-本プロジェクトは [MIT License](file:///c:/my-projects/gemini-tts-clone/LICENSE) のもとで公開されています。
