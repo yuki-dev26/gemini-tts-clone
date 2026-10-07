@@ -1,7 +1,18 @@
 # 🎙️ Gemini Voice Replication & TTS デモ (Bun + TypeScript)
 
-Google Gemini API（`gemini-3.8-flash-tts`）の **Voice Replication（声のクローン学習）** および **Text-to-Speech（音声合成）** を体験できるTypeScriptプロジェクトです。
+Google Gemini API の最新TTSモデル（`gemini-3.8-flash-tts` および `gemini-3.8-flash-lite-tts`）を使用した、**Voice Replication（声のクローン学習）** および **Text-to-Speech（音声合成）** を体験できるTypeScriptプロジェクトです。
 ランタイムには高速な **Bun** を採用しています。
+
+---
+
+## 🌟 対応モデル
+
+| モデル名 | 特徴 | 用途・メリット |
+| :--- | :--- | :--- |
+| **`gemini-3.8-flash-tts`** (デフォルト) | 高表現力・自然な抑揚 | ナレーション、対話、高品質なコンテンツ制作 |
+| **`gemini-3.8-flash-lite-tts`** (Lite) | 超高速・低コスト | リアルタイム音声エージェント、大量生成 |
+
+※ 本プロジェクトでは、コマンド1つで通常版とLite版を自由に切り替えられます。
 
 ---
 
@@ -17,7 +28,7 @@ gemini-tts-clone/
 │   ├── latest.wav            # 最新の合成結果
 │   └── speech_*.wav          # 日時付きの履歴
 ├── src/
-│   ├── client.ts             # Gemini SDK初期化・設定管理
+│   ├── client.ts             # Gemini SDK初期化・設定管理・モデル定義
 │   ├── replicate.ts          # 音声モデル作成（Voices API）
 │   ├── tts.ts                # 音声合成（Interactions API / GenerateContent）
 │   ├── list-voices.ts        # 登録済み音声モデル一覧表示
@@ -25,7 +36,8 @@ gemini-tts-clone/
 ├── voice_config.json         # 作成された Voice ID などのローカルキャッシュ（自動保存）
 ├── .env.example              # APIキー設定サンプル
 ├── package.json
-└── tsconfig.json
+├── tsconfig.json
+└── LICENSE                   # MIT License
 ```
 
 ---
@@ -40,7 +52,7 @@ gemini-tts-clone/
 GEMINI_API_KEY=AIzaSy...あなたのAPIキー
 ```
 
-> APIキーは [Google AI Studio](https://aistudio.google.com/apikey) から取得できます。
+> APIキーは [Google AI Studio](https://aistudio.google.com/apikey) から無料で取得できます。
 > ※ Bun はプロジェクトルートの `.env` を自動で読み込みます。
 
 ---
@@ -67,18 +79,22 @@ GEMINI_API_KEY=AIzaSy...あなたのAPIキー
 
 PowerShell 7 で以下のコマンドを実行します：
 
+#### 🌟 標準モデル (`gemini-3.8-flash-tts`) で作成
+
 ```powershell
 bun run replicate
 ```
 
-- 音声ファイルが Gemini API に送信され、生体認証（声紋照合）と同意確認が行われます。
-- 成功すると、作成された `Voice ID`（例: `voice_123456...`）がコンソールに表示され、`voice_config.json` に自動保存されます。
+#### ⚡ Liteモデル (`gemini-3.8-flash-lite-tts`) で作成
 
-> **オプション指定例:**
->
-> ```powershell
-> bun run replicate -- --name "マイボイス1"
-> ```
+```powershell
+bun run replicate:lite
+# または
+bun run replicate -- --lite
+```
+
+- 音声ファイルが Gemini API に送信され、生体認証（声紋照合）と同意確認が行われます。
+- 成功すると、作成された `Voice ID`（例: `voice_123456...`）がコンソールに表示され、[voice_config.json](file:///c:/my-projects/gemini-tts-clone/voice_config.json) に自動保存されます。
 
 ---
 
@@ -86,22 +102,27 @@ bun run replicate
 
 作成した音声モデルを使って、テキストを読み上げさせます。
 
-#### デフォルトテキストで試す
+#### 🌟 標準モデルで生成
 
 ```powershell
+# デフォルトテキストで試す
 bun run tts
-```
 
-#### 任意のテキストを喋らせる
-
-```powershell
+# 任意のテキストを喋らせる
 bun run tts -- "こんにちは！これはGemini APIで複製した私の声です。"
+
+# 発話スタイルを指定する
+bun run tts -- "今日も一日お疲れ様でした！" --style "cheerful and energetic"
 ```
 
-#### 発話スタイルやVoice IDを指定して実行する
+#### ⚡ Liteモデルで高速生成
 
 ```powershell
-bun run tts -- "今日も一日お疲れ様でした！" --style "cheerful and energetic"
+# Liteモデルで生成
+bun run tts:lite
+
+# 任意のテキストをLiteで生成
+bun run tts:lite -- "軽量モデルによる高速な音声合成です。"
 ```
 
 - 生成された音声は [outputs/latest.wav](file:///c:/my-projects/gemini-tts-clone/outputs/latest.wav) および日時付きファイルに保存されます。
@@ -123,3 +144,9 @@ bun run delete-voice
 # または特定のIDを指定:
 bun run delete-voice voice_xxxxxx
 ```
+
+---
+
+## 📄 ライセンス
+
+本プロジェクトは [MIT License](file:///c:/my-projects/gemini-tts-clone/LICENSE) のもとで公開されています。

@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "Gemini API Voice Replication & TTS Demo (Bun)",
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "replicate": "bun run src/replicate.ts",
+    "replicate:lite": "bun run src/replicate.ts --lite",
     "tts": "bun run src/tts.ts",
+    "tts:lite": "bun run src/tts.ts --lite",
     "list-voices": "bun run src/list-voices.ts",
     "delete-voice": "bun run src/delete-voice.ts"
   },
@@ -16,7 +19,6 @@
     "bun"
   ],
   "author": "",
-  "license": "MIT",
   "dependencies": {
     "@google/genai": "^2.27.0"
   },

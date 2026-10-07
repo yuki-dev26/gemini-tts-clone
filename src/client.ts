@@ -2,6 +2,45 @@ import { GoogleGenAI } from "@google/genai";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+// サポートされているTTSモデル
+export const SUPPORTED_MODELS = {
+  flash: "gemini-3.8-flash-tts",
+  lite: "gemini-3.8-flash-lite-tts",
+} as const;
+
+export type SupportedModelKey = keyof typeof SUPPORTED_MODELS;
+export const DEFAULT_MODEL = SUPPORTED_MODELS.flash;
+
+/**
+ * コマンドライン引数などからTTSモデル名を解決するヘルパー関数
+ */
+export function resolveModel(
+  specifiedModel?: string,
+  useLiteFlag: boolean = false,
+  fallbackModel: string = DEFAULT_MODEL,
+): string {
+  if (useLiteFlag) {
+    return SUPPORTED_MODELS.lite;
+  }
+  if (!specifiedModel) {
+    return fallbackModel;
+  }
+
+  const lower = specifiedModel.toLowerCase().trim();
+  if (lower === "lite" || lower === "flash-lite" || lower.includes("lite")) {
+    return SUPPORTED_MODELS.lite;
+  }
+  if (lower === "flash" || lower === "standard" || lower === "default") {
+    return SUPPORTED_MODELS.flash;
+  }
+  if (lower === SUPPORTED_MODELS.flash || lower === SUPPORTED_MODELS.lite) {
+    return lower;
+  }
+
+  // それ以外の文字列が直接指定された場合はそのまま使用
+  return specifiedModel;
+}
+
 // APIキーの確認
 const apiKey = process.env.GEMINI_API_KEY;
 

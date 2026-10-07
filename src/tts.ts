@@ -1,6 +1,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { ai, loadVoiceConfig } from "./client.js";
+import {
+  ai,
+  loadVoiceConfig,
+  resolveModel,
+  SUPPORTED_MODELS,
+} from "./client.js";
 
 // コマンドライン引数の簡易パース
 function getArg(flag: string): string | undefined {
@@ -9,6 +14,10 @@ function getArg(flag: string): string | undefined {
     return process.argv[index + 1];
   }
   return undefined;
+}
+
+function hasFlag(flag: string): boolean {
+  return process.argv.includes(flag);
 }
 
 // プレーンな引数（フラグ以外のテキスト入力）を取得
@@ -20,6 +29,9 @@ function getPositionalText(): string | undefined {
   for (let i = 0; i < args.length; i++) {
     if (skipNext) {
       skipNext = false;
+      continue;
+    }
+    if (args[i] === "--lite" || args[i] === "--flash") {
       continue;
     }
     if (args[i].startsWith("--")) {
@@ -108,7 +120,7 @@ async function synthesizeWithGenerateContent(
 async function main() {
   console.log("\n=======================================================");
   console.log(" 🔊 Gemini API TTS（音声合成）デモ");
-  console.log("=======================================================\n");
+  console.log("=======================================================");
 
   // 保存済みの VoiceConfig を取得
   const savedConfig = loadVoiceConfig();
@@ -116,8 +128,12 @@ async function main() {
   // コマンドライン引数から voice-id を取得（無ければ保存されたIDを使用）
   const voiceId = getArg("--voice-id") || savedConfig?.voiceId;
   const style = getArg("--style") || "warm and conversational";
-  const modelName =
-    getArg("--model") || savedConfig?.model || "gemini-3.8-flash-tts";
+
+  // モデルの決定（--lite / --flash フラグ、または --model 指定、または保存時のモデル）
+  const useLite = hasFlag("--lite");
+  const specifiedModel = getArg("--model");
+  const fallbackModel = savedConfig?.model || SUPPORTED_MODELS.flash;
+  const modelName = resolveModel(specifiedModel, useLite, fallbackModel);
 
   // テキストの決定
   const defaultText =
@@ -125,7 +141,9 @@ async function main() {
   const inputText = getPositionalText() || getArg("--text") || defaultText;
 
   if (!voiceId) {
-    console.error("\x1b[31m[エラー] 有効な Voice ID が見つかりません。\x1b[0m");
+    console.error(
+      "\n\x1b[31m[エラー] 有効な Voice ID が見つかりません。\x1b[0m",
+    );
     console.error("先に以下のコマンドで音声モデルを作成してください：");
     console.error("  \x1b[36mbun run replicate\x1b[0m\n");
     console.error("または、既存の Voice ID を直接指定して実行してください：");
@@ -135,11 +153,18 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`🆔 使用する Voice ID: \x1b[33m${voiceId}\x1b[0m`);
+  const modelLabel =
+    modelName === SUPPORTED_MODELS.lite
+      ? "⚡ 軽量・高速モデル (Lite)"
+      : "🌟 標準・高表現力モデル (Standard)";
+
+  console.log(`\n🆔 使用する Voice ID: \x1b[33m${voiceId}\x1b[0m`);
   if (savedConfig?.displayName) {
     console.log(`🏷️ モデル表示名:     ${savedConfig.displayName}`);
   }
-  console.log(`🤖 ベースモデル:       ${modelName}`);
+  console.log(
+    `🤖 合成モデル:         \x1b[35m${modelName}\x1b[0m (${modelLabel})`,
+  );
   console.log(`🎨 発話スタイル:       ${style}`);
   console.log(`📝 合成するテキスト:\n   「\x1b[32m${inputText}\x1b[0m」\n`);
 

@@ -1,6 +1,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { ai, saveVoiceConfig } from "./client.js";
+import {
+  ai,
+  resolveModel,
+  saveVoiceConfig,
+  SUPPORTED_MODELS,
+} from "./client.js";
 
 // コマンドライン引数の簡易パース
 function getArg(flag: string, defaultValue?: string): string | undefined {
@@ -9,6 +14,10 @@ function getArg(flag: string, defaultValue?: string): string | undefined {
     return process.argv[index + 1];
   }
   return defaultValue;
+}
+
+function hasFlag(flag: string): boolean {
+  return process.argv.includes(flag);
 }
 
 async function main() {
@@ -29,7 +38,11 @@ async function main() {
     "--name",
     `Custom Voice ${new Date().toISOString().slice(0, 10)}`,
   )!;
-  const modelName = getArg("--model", "gemini-3.8-flash-tts")!;
+
+  // モデルの判定（--lite フラグまたは --model オプション）
+  const useLite = hasFlag("--lite");
+  const specifiedModel = getArg("--model");
+  const modelName = resolveModel(specifiedModel, useLite);
 
   let hasError = false;
 
@@ -79,10 +92,15 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`📁 参照音声: ${referencePath}`);
-  console.log(`📁 同意音声: ${consentPath}`);
-  console.log(`🏷️ 表示名:   ${displayName}`);
-  console.log(`🤖 ベースモデル: ${modelName}`);
+  const modelLabel =
+    modelName === SUPPORTED_MODELS.lite
+      ? "⚡ 軽量・高速モデル (Lite)"
+      : "🌟 標準・高表現力モデル (Standard)";
+
+  console.log(`📁 参照音声:   ${referencePath}`);
+  console.log(`📁 同意音声:   ${consentPath}`);
+  console.log(`🏷️ 表示名:     ${displayName}`);
+  console.log(`🤖 ベースモデル: \x1b[35m${modelName}\x1b[0m (${modelLabel})`);
   console.log("\n音声データを読み込んでエンコード中...");
 
   const sourceB64 = fs.readFileSync(referencePath).toString("base64");
@@ -123,6 +141,7 @@ async function main() {
     console.log("\n\x1b[32m✨ 音声モデルの作成が正常に完了しました！\x1b[0m");
     console.log(`🆔 Voice ID: \x1b[33m${voiceId}\x1b[0m`);
     console.log(`🏷️ 表示名:   ${replicatedVoice.display_name ?? displayName}`);
+    console.log(`🤖 学習モデル: ${modelName}`);
 
     // 設定ファイルに保存（TTS時に自動で利用可能にする）
     saveVoiceConfig({
@@ -139,6 +158,8 @@ async function main() {
       "以下のコマンドで、複製された声でTTS（音声合成）を実行できます:",
     );
     console.log("  \x1b[36mbun run tts\x1b[0m");
+    console.log("またはLiteモデルで高速合成:");
+    console.log("  \x1b[36mbun run tts:lite\x1b[0m");
     console.log("または任意のテキストを指定して実行:");
     console.log(
       '  \x1b[36mbun run tts "こんにちは！私のクローン音声へようこそ。"\x1b[0m',
