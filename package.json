@@ -1,0 +1,26 @@
+{
+  "name": "gemini-tts-clone",
+  "version": "1.0.0",
+  "description": "Gemini API Voice Replication & TTS Demo (Bun)",
+  "type": "module",
+  "scripts": {
+    "replicate": "bun run src/replicate.ts",
+    "tts": "bun run src/tts.ts",
+    "list-voices": "bun run src/list-voices.ts",
+    "delete-voice": "bun run src/delete-voice.ts"
+  },
+  "keywords": [
+    "gemini",
+    "voice-replication",
+    "tts",
+    "bun"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.27.0"
+  },
+  "devDependencies": {
+    "bun-types": "^1.2.0"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+voice_config.json
+
+# 音声ファイル（プライバシー保護のためリポジトリには含めない）
+audio_inputs/*.wav
+audio_inputs/*.mp3
+outputs/*.wav
